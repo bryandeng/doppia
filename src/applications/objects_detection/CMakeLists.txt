@@ -92,7 +92,7 @@ include_directories(
 if(USE_GPU)
 cuda_include_directories("${doppia_root}/libs/")
 endif(USE_GPU)
-        
+
 # ----------------------------------------------------------------------
 # Collect source files
 
@@ -213,7 +213,7 @@ target_link_libraries(cuda_stuff_library
 )
 
 #set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} --generate-line-info) # used during profiling
-  
+
 endif(USE_GPU)
 # ----------------------------------------------------------------------
 # Create the executable
@@ -231,12 +231,12 @@ target_link_libraries(objects_detection
    ${cg_LIBRARIES}
    # linking with CgGL _after_ boost_program_options generates a segmentation fault ! boost_program_options 1.39 has a bug
 
-   boost_program_options-mt boost_filesystem-mt boost_system-mt boost_thread-mt
+   boost_program_options boost_filesystem boost_system boost_thread
    protobuf pthread
    SDL X11 Xext #Xrandr
    gomp
    ${libpng_LIBRARIES} jpeg
-#  ${OpenEXR_LIBRARIES} 
+#  ${OpenEXR_LIBRARIES}
    ${opencv_LIBRARIES}
 
    #${vw_LIBRARIES}
@@ -253,7 +253,7 @@ target_link_libraries(objects_detection
    #LLVMAsmPrinter LLVMMCParser LLVMX86AsmPrinter LLVMX86Info LLVMJIT
    #LLVMExecutionEngine LLVMCodeGen LLVMScalarOpts LLVMInstCombine LLVMTransformUtils LLVMipa
    #LLVMAnalysis LLVMTarget LLVMMC LLVMCore LLVMSupport LLVMSystem
-)   
+)
 
 if(USE_GPU)
 target_link_libraries(objects_detection cuda_stuff_library ${local_CUDA_LIB})

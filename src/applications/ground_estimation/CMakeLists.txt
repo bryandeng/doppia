@@ -65,7 +65,7 @@ include_directories("${doppia_root}/libs/" "${doppia_root}/src"
 set(doppia_src "${doppia_root}/src")
 set(doppia_stereo "${doppia_root}/src/stereo_matching")
 
-file(GLOB SrcCpp 
+file(GLOB SrcCpp
   "./*.cpp"
   "${doppia_src}/*.cpp"
   "${doppia_src}/applications/*.cpp"
@@ -121,7 +121,7 @@ target_link_libraries(ground_estimation
    ${cg_LIBRARIES}
    # linking with CgGL _after_ boost_program_options generates a segmentation fault ! boost_program_options 1.39 has a bug
 
-   boost_program_options-mt boost_filesystem-mt boost_system-mt boost_thread-mt
+   boost_program_options boost_filesystem boost_system boost_thread
    protobuf pthread
    SDL
    gomp Xext Xrandr X11
@@ -134,6 +134,6 @@ target_link_libraries(ground_estimation
    #${google_perftools_LIBS}
    # faster malloc and non intrusive profiler
    # via http://google-perftools.googlecode.com
-)   
+)
 
 # ----------------------------------------------------------------------
