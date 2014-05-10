@@ -78,6 +78,13 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -DNDEBUG -DBOOST_D
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELEASE} -g")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 
+set(opencv_LIBRARIES
+    opencv_core opencv_imgproc opencv_highgui opencv_ml
+    opencv_video opencv_features2d
+    opencv_calib3d
+    #opencv_objdetect opencv_contrib
+    opencv_legacy opencv_flann opencv_gpu
+   )
 
 if(USE_GPU)
   add_definitions(-DUSE_GPU)
