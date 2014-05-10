@@ -31,160 +31,30 @@ set(OPT_CXX_FLAGS "-fopenmp -ffast-math -funroll-loops -march=native")
 
 #option(CUDA_HOST_SHARED_FLAGS OFF) # cuda/nvcc uses a separate set of options than gcc
 
-set(VISICS_MACHINES 
-  "vesta" "nereid" # intel vpro
-  "enif" # core 2 quad
-  "kochab" "oculus"  "izar" "yildun" "watar" "sadr" # intel v7, core i7 860  @ 2.80GHz
-  "unuk" # intel v7, cire i7 870 @ 2.93GHz
-  "jabbah" "matar" # top of the line cpu and gpu
-)
-
-
-list(FIND VISICS_MACHINES ${HOSTNAME} HOSTED_AT_VISICS)
-#message(STATUS "HOSTED_AT_VISICS == ${HOSTED_AT_VISICS}")
-
-if(HOSTED_AT_VISICS GREATER -1)
-  message(STATUS "Using ${VISICS_MACHINES} optimisation options")
-
-  # since gcc 4.6 the option -Ofast provides faster than -O3
-  set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
-  #set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -DNDEBUG")
-
-  # add local compiled opencv trunk in the pkg-config paths
-  set(PKG_CONFIG_PATH ${PKG_CONFIG_PATH}:/users/visics/rbenenso/no_backup/usr/local/lib/pkgconfig)
-
-  #set(OPT_CXX_FLAGS "-fopenmp -march=native -mtune=native -ffast-math -msse -msse2 -msse3 -mssse3 -msse4.1 -msse4.2") # just for testing
-  
-  option(USE_GPU "Should the GPU be used ?" ON)
-  #option(USE_GPU "Should the GPU be used ?" OFF) # set to false for testing purposes only
-  set(CUDA_BUILD_EMULATION OFF CACHE BOOL "enable emulation mode")
-  set(CUDA_BUILD_CUBIN OFF)
-  set(local_CUDA_CUT_INCLUDE_DIRS "/users/visics/rbenenso/code/references/cuda/cuda_sdk/C/common/inc")
-  set(local_CUDA_CUT_LIBRARY_DIRS "/users/visics/rbenenso/code/references/cuda/cuda_sdk/C/lib")
-  set(local_CUDA_LIB_DIR "/usr/lib64/nvidia")
-  set(local_CUDA_LIB "/usr/lib64/nvidia/libcuda.so")
-  set(cuda_LIBS "cuda")
-  set(cutil_LIB "cutil")
-
-  # if you get error messages in nvcc-generated files,
-  # enable the following line for debugging:
-  #set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS};--keep")
-  #set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} --host-compilation c++ --device-compilation c++)
-  set(CUDA_NVCC_EXECUTABLE  /users/visics/rbenenso/code/references/cuda/gcc-4.4/nvcc-4.4.sh)
-  set(CUDA_SDK_ROOT_DIR  /users/visics/rbenenso/code/references/cuda_sdk_4.0.17/C)
-  set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} --compiler-options -D__USE_XOPEN2K8) # black magic required on Visics machines
-
-  set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -arch=sm_20) # only matar, jabbah and yildun can run current code
-
-  # faster malloc, and a good profiler via http://google-perftools.googlecode.com
-  #set(google_perftools_LIBS tcmalloc profiler)
-  set(google_perftools_LIBS tcmalloc_and_profiler)
-
-  set(liblinear_INCLUDE_DIRS "/users/visics/rbenenso/code/references/machine_learning/liblinear-1.8")
-  set(liblinear_LIBRARY_DIRS "/users/visics/rbenenso/code/references/machine_learning/liblinear-1.8")
-
- add_definitions("-Dint_p_NULL=((int*)0)")
-
-elseif(${HOSTNAME} STREQUAL  "rodrigob-laptop")
-  message(STATUS "Using rodrigob-laptop optimisation options")
-
-  option(USE_GPU "Should the GPU be used ?" FALSE)
-  set(CUDA_BUILD_EMULATION ON CACHE BOOL "enable emulation mode")
-  set(CUDA_BUILD_CUBIN OFF)
-  set(local_CUDA_CUT_INCLUDE_DIRS "/home/rodrigob/work/code/biclop_references/cuda/cuda_sdk/C/common/inc")
-  set(local_CUDA_CUT_LIBRARY_DIRS "/home/rodrigob/work/code/biclop_references/cuda/cuda_sdk/C/lib")
-  set(cuda_LIBS "")
-  set(cutil_LIB "cutil")
-
-  set(GCC44_DIRECTORY "/home/rodrigob/work/code/biclop_references/cuda/gcc-4.4/")
-  set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} --compiler-bindir ${GCC44_DIRECTORY})
-
-  # faster malloc, and a good profiler via http://google-perftools.googlecode.com
-  set(google_perftools_LIBS tcmalloc profiler)
-  set(EUROPA_SVN "/home/rodrigob/work/code/europa_svn/code")
-
-  set(liblinear_INCLUDE_DIRS "/home/rodrigob/work/code/biclop_references/liblinear-1.8")
-  set(liblinear_LIBRARY_DIRS "/home/rodrigob/work/code/biclop_references/liblinear-1.8")
-
-
-elseif(${HOSTNAME} STREQUAL  "visics-gt680r")
-  message(STATUS "Using visics-gt680r optimisation options")
-
-  option(USE_GPU "Should the GPU be used ?" TRUE)
-  #set(CUDA_BUILD_EMULATION OFF CACHE BOOL "enable emulation mode")
-  set(CUDA_BUILD_CUBIN OFF)
-  
-  # work around to use gcc-4.4 instead of 4.5
-  #set(CUDA_NVCC_EXECUTABLE "/home/rodrigob/code/references/cuda/gcc-4.4/nvcc-4.4.sh") 
-  set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -arch=sm_21)
-
-  set(local_CUDA_CUT_INCLUDE_DIRS "/home/rodrigob/code/references/cuda/cuda_sdk/C/common/inc")
-  set(local_CUDA_CUT_LIBRARY_DIRS "/home/rodrigob/code/references/cuda/cuda_sdk/C/lib")
-  set(local_CUDA_LIB_DIR "/usr/local/cuda/lib64")
-  set(cuda_LIBS "")
-  set(cutil_LIB "cutil")
-
-  # faster malloc, and a good profiler via http://google-perftools.googlecode.com
-  set(google_perftools_LIBS tcmalloc profiler)
-  set(EUROPA_SVN "/home/rodrigob/code/europa_svn/code")
-
-  set(liblinear_INCLUDE_DIRS "/home/rodrigob/code/references/liblinear-1.8")
-  set(liblinear_LIBRARY_DIRS "/home/rodrigob/code/references/liblinear-1.8")
-
-elseif(${HOSTNAME} STREQUAL  "lap-12-31")
-  message(STATUS "Using lap-12-31 optimisation options")
+# ----------------------------------------------------------------------
+# Boyuan Deng's machine: Dell Precision M4600 "Caspar"
+# ----------------------------------------------------------------------
+if(${HOSTNAME} STREQUAL  "Caspar")
+  message(STATUS "Using Boyuan Deng's Dell Precision M4600 optimization options")
 
   set(CMAKE_CXX_COMPILER "/usr/bin/g++-4.7")
-  set(CMAKE_C_COMPILER "/usr/bin/g++-4.7")
-  # since gcc 4.6 -Ofast is faster than -O3
-  set(CMAKE_C_FLAGS_RELEASE "-Ofast -DNDEBUG")
-  set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -DNDEBUG")
-
-  set(CUDA_PROPAGATE_HOST_FLAGS "OFF") # since nvcc does not handle -Ofast
-  set(CUDA_NVCC_FLAGS_RELEASE "-O3 -DNDEBUG")
-  set(CUDA_NVCC_FLAGS_RELWITHDEBINFO "-O3 -DNDEBUG")
+  set(CMAKE_C_COMPILER "/usr/bin/gcc-4.7")
 
   # add local compiled opencv trunk in the pkg-config paths
-  #set(PKG_CONFIG_PATH ${PKG_CONFIG_PATH}:/home/mfritz/local/lib/pkgconfig)
-  #set(PKG_CONFIG_PATH /home/mfritz/local/lib/pkgconfig)
+  #set(PKG_CONFIG_PATH ${PKG_CONFIG_PATH}:/usr/local/lib/pkgconfig)
+  set(PKG_CONFIG_PATH /usr/local/lib/pkgconfig)
 
-  set(opencv_INCLUDE_DIRS "/usr/local/include/opencv2")
-  set(opencv_LIBRARY_DIRS "/usr/local/lib")
+  set(opencv_INCLUDE_DIRS "/usr/local/include/")
+  set(opencv_LIBRARY_DIRS "/usr/local/lib/")
 
   option(USE_GPU "Should the GPU be used ?" TRUE)
-  #set(CUDA_BUILD_EMULATION OFF CACHE BOOL "enable emulation mode")
   set(CUDA_BUILD_CUBIN OFF)
-
-  # work around to use gcc-4.4 instead of 4.5
-  #set(CUDA_NVCC_EXECUTABLE "/home/rodrigob/code/references/cuda/gcc-4.4/nvcc-4.4.sh")
-  set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -arch=sm_30)
-
-  set(local_CUDA_CUT_INCLUDE_DIRS "/home/rodrigob/code/references/cuda/cuda_sdk/C/common/inc")
-  set(local_CUDA_CUT_LIBRARY_DIRS "/home/rodrigob/code/references/cuda/cuda_sdk/C/lib")
-  set(local_CUDA_LIB_DIR "/usr/local/cuda/lib64")
-  set(cuda_LIBS "")
-  #set(cutil_LIB "cutil")
-  set(cutil_LIB "") # no cutil
+  set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -arch=sm_21)
 
   # faster malloc, and a good profiler via http://google-perftools.googlecode.com
   set(google_perftools_LIBS tcmalloc profiler)
-  set(EUROPA_SVN "/home/rodrigob/code/europa_svn/code")
-
-  set(liblinear_INCLUDE_DIRS "/home/rodrigob/code/references/liblinear-1.8")
-  set(liblinear_LIBRARY_DIRS "/home/rodrigob/code/references/liblinear-1.8")
-
-  include_directories(
-   # "/home/rodrigob/code/references/libwebp-0.3.0-linux-x86-64/include"
-  )
-
-  link_directories(
-   # "/home/rodrigob/code/references/libwebp-0.3.0-linux-x86-64/lib"
-  )
-
-else ()
-  message(FATAL_ERROR, "Unknown machine, please add your configuration inside biclop/common_settings.cmake")
-  
 endif ()
+
 
 # ----------------------------------------------------------------------
 # enable compilation for shared libraries
@@ -195,7 +65,7 @@ if(CMAKE_BUILD_TYPE MATCHES "Debug")
   set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -g -G)
 else()
 # FIXME disabled only for testing
-#  set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -O3 --use_fast_math) # speed up host and device code
+  set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -O3 --use_fast_math) # speed up host and device code
 endif()
 
 # ----------------------------------------------------------------------
@@ -205,12 +75,12 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g") # add debug information, even in release mode
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -DNDEBUG -DBOOST_DISABLE_ASSERTS ${OPT_CXX_FLAGS}")
 #set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} ${CMAKE_CXX_FLAGS_RELEASE}")
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELEASE} -g")  
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG") 
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELEASE} -g")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 
 
 if(USE_GPU)
-  add_definitions(-DUSE_GPU) 
+  add_definitions(-DUSE_GPU)
 endif(USE_GPU)
 
 
