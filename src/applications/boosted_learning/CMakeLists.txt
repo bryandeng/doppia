@@ -120,9 +120,9 @@ target_link_libraries(boosted_learning
    bootstrapping
    linear
 
-   boost_program_options-mt
-   boost_filesystem-mt boost_system-mt
-   boost_thread-mt pthread
+   boost_program_options
+   boost_filesystem boost_system
+   boost_thread pthread
    protobuf
    SDL X11 Xext #Xrandr
    gomp
